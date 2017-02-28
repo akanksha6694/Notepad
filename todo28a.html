@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<title>Notes to Self</title>
+
+</head>
+
+<h1 align="center"> TODAY'S BUCKET LIST </h1>
+
+<style type="text/css">
+	
+h1 { color: #8B475D; font-family: 'Helvetica Neue', sans-serif; font-size: 100px; font-weight: bold; letter-spacing: -1px; line-height: 1; text-align: center; }
+
+
+
+
+
+
+body {
+  line-height: 1;
+  font-family: "Lato", sans-serif;
+  background-color: #EFF1F2;
+  background-image: url("ink.jpg");
+}
+
+
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  list-style-type: none;
+  padding: 10px;
+  border-bottom: 1px solid #8B8378;
+  background-color: #282828;
+}
+
+li {
+  text-decoration: none;
+  color: black;
+  display: block;
+  word-wrap: break-word;
+  height: 210px;
+  width: 210px;
+  padding: 1em;
+  -moz-box-shadow: 5px 5px 7px #212121;
+  -webkit-box-shadow: 5px 5px 7px rgba(33, 33, 33, 0.7);
+  box-shadow: 5px 5px 7px rgba(33, 33, 33, 0.7);
+  -moz-transition: -moz-transform 0.15s linear;
+  -o-transition: -o-transform 0.15s linear;
+  -webkit-transition: -webkit-transform 0.15s linear;
+}
+
+
+ul.list-item li {
+  margin: 20px 40px 30px 0px;
+  float: left;
+}
+
+
+.inputbar {
+  border: 1px solid #BC8F8F;
+  padding-left: 10px;
+  width: 70%;
+  word-wrap: break-word;
+  height: 35px;
+  color: #555;
+}
+
+
+button {
+  color: #555;
+  background-color: #FFFFFF;
+  border: 1px solid #bbb;
+  outline: 0;
+  width: 100px;
+  height: 50px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+
+.list li {
+  background-color:#BC8F8F;
+}
+
+.list li button {
+  background-color: transparent;
+  border: 1px solid transparent;
+  color: #ddd;
+  display: inline;
+  visibility: hidden;
+   width: 50px;
+  height: 20px;
+   float: right;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.list li:hover > button {
+  visibility: visible;
+}
+
+.list label {
+  padding-right: 10px;
+  display: block;
+  position: relative;
+  white-space: pre-line;
+  overflow: auto;
+  width:200px;
+  height: 200px;
+  word-wrap: break-word;
+  font-size: 18px;
+  line-height: 24px;
+  color:#282828;
+}
+
+.list li.done label {
+  color: #d9d9d9;
+  text-decoration: line-through;
+}
+
+
+
+
+</style>
+
+
+
+<body>
+<!-- Main Div Holding our Application Data -->
+<div class="container" id="notes">
+      <!-- bar for holding our input -->
+      <section class="bar"> 
+
+        <input type="checkbox" id="mark-all" v-on:click="allSelect" :checked="areAllMarked">
+        <input type="text" v-model="newNote" placeholder="Enter your note here..." autofocus class="inputbar">
+        <button v-on:click="addNote">Add Note</button>
+        <button v-on:click="deleteNotes">Clear List</button>
+        
+
+      </section>
+
+      <section class="list">
+        <!-- Unorderd list for holding our notes items -->
+        <ul class="list-item">
+
+          <li v-for="task in taskList" :class="{done: isChecked(task)}">
+
+            <input type="checkbox" class="checkbox"  v-on:click="check" v-model="task.checked">
+            <button class="delete" v-on:click="deleteNote(task)">x</button>
+
+            
+            <input type="text" v-if="task === noteEditing" v-auto-focus class="inputbar" v-on:keyup.enter="endEditing(task)" v-on:blur="endEditing(task)" v-model="task.text">
+
+            <label for="checkbox" v-if="task !== noteEditing" v-on:click="editNote(task)">{{ task.text }}</label>
+            
+            
+          </li>
+        
+        </ul>
+      
+      </section>
+
+  </div>
+  
+
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.0.3/vue.js"></script>
+
+
+<script>
+
+
+
+  new Vue({
+    
+    el: '#notes',
+    
+    data: {
+      newNote: "",
+      taskList: [],
+  
+
+      noteEditing: {
+
+      }
+    },
+    
+    computed: {
+      areAllMarked: function () {
+        //Check if every checked property returns true and if there is at least one to-do item
+        return this.taskList.every(function(task) {
+          return task.checked;
+        }) &&  this.taskList.length > 0;
+      },
+    },
+
+    methods: {
+
+      addNote: function () {
+        alert('Adding new note!');
+         //trim() is used to remove whitespace from both ends of a string
+        var task = this.newNote.trim();
+        //if task is not an empty string
+        if (task) {
+          //Push an object containing the task to the taskList array
+          this.taskList.push({text: task, checked: false});
+          //Reset newNote to an empty string so the input field is cleared
+          this.newNote = "";
+        }
+      },
+
+      deleteNote: function (task) {
+        //Grab the index of the task and remove it
+        var index = this.taskList.indexOf(task);
+        this.taskList.splice(index, 1);
+      },
+
+      editNote: function (task) {
+        this.noteEditing = task;
+      },
+
+      endEditing: function (task) {
+        this.noteEditing = {};
+        if (task.text.trim() === ""){
+          this.deleteNote(task);
+        }
+        
+      },
+
+      deleteNotes: function () {
+        //Setting taskList to an empty array clears the whole list
+        this.taskList = [
+
+        ];
+      },
+
+      allSelect: function (task) {
+        //targetValue is set to the opposite of areAllMarked
+        var targetValue = this.areAllMarked ? false : true;
+        //we use a for loop to set the checked state of all items to the target value
+        for (var i = 0; i < this.taskList.length; i++) {
+          this.taskList[i].checked = targetValue;
+        }
+      },
+
+      check: function (task) {
+        task.checked = true;
+      },
+
+      isChecked: function (task) {
+        return task.checked;
+      }
+
+    }
+  });
+
+</script>
+</body>
+</html>
