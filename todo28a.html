@@ -4,7 +4,7 @@
 
 <head>
 
-<title>Notes to Self</title>
+<title>Today's Bucket List</title>
 
 </head>
 
@@ -14,19 +14,12 @@
 	
 h1 { color: #8B475D; font-family: 'Helvetica Neue', sans-serif; font-size: 100px; font-weight: bold; letter-spacing: -1px; line-height: 1; text-align: center; }
 
-
-
-
-
-
 body {
   line-height: 1;
   font-family: "Lato", sans-serif;
   background-color: #EFF1F2;
   background-image: url("ink.jpg");
 }
-
-
 
 .bar {
   display: flex;
@@ -38,7 +31,31 @@ body {
   background-color: #282828;
 }
 
-li {
+/*bar holds the inputbar to type the notes*/
+.inputbar {
+  border: 1px solid #BC8F8F;
+  padding-left: 10px;
+  width: 70%;
+  word-wrap: break-word;
+  height: 35px;
+  color: #555;
+}
+
+/*button in the bar*/
+button {
+  color: #555;
+  background-color: #FFFFFF;
+  border: 1px solid #bbb;
+  outline: 0;
+  width: 100px;
+  height: 50px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+ /*list of stickynotes*/
+.stickynotes li {
+  background-color:#BC8F8F;
   text-decoration: none;
   color: black;
   display: block;
@@ -54,40 +71,14 @@ li {
   -webkit-transition: -webkit-transform 0.15s linear;
 }
 
-
-ul.list-item li {
+/*noteList are individual list of notes*/
+ul.noteList li {
   margin: 20px 40px 30px 0px;
   float: left;
 }
 
 
-.inputbar {
-  border: 1px solid #BC8F8F;
-  padding-left: 10px;
-  width: 70%;
-  word-wrap: break-word;
-  height: 35px;
-  color: #555;
-}
-
-
-button {
-  color: #555;
-  background-color: #FFFFFF;
-  border: 1px solid #bbb;
-  outline: 0;
-  width: 100px;
-  height: 50px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-
-.list li {
-  background-color:#BC8F8F;
-}
-
-.list li button {
+.stickynotes li button {
   background-color: transparent;
   border: 1px solid transparent;
   color: #ddd;
@@ -100,11 +91,12 @@ button {
   font-weight: bold;
 }
 
-.list li:hover > button {
+.stickynotes li:hover > button {
   visibility: visible;
 }
 
-.list label {
+/*editBar for editing the notes*/
+.stickynotes editBar {
   padding-right: 10px;
   display: block;
   position: relative;
@@ -118,7 +110,7 @@ button {
   color:#282828;
 }
 
-.list li.done label {
+.stickynotes li.done editBar {
   color: #d9d9d9;
   text-decoration: line-through;
 }
@@ -131,32 +123,32 @@ button {
 
 
 <body>
-<!-- Main Div Holding our Application Data -->
-<div class="container" id="notes">
+<!-- Main Div (bucketlist) Holding our Application Data -->
+<div class="container" id="bucketlist">
       <!-- bar for holding our input -->
       <section class="bar"> 
 
         <input type="checkbox" id="mark-all" v-on:click="allSelect" :checked="areAllMarked">
         <input type="text" v-model="newNote" placeholder="Enter your note here..." autofocus class="inputbar">
         <button v-on:click="addNote">Add Note</button>
-        <button v-on:click="deleteNotes">Clear List</button>
+        <button v-on:click="deleteNotes">Delete all Notes</button>
         
 
       </section>
 
-      <section class="list">
+      <section class="stickynotes">
         <!-- Unorderd list for holding our notes items -->
-        <ul class="list-item">
+        <ul class="noteList">
 
-          <li v-for="task in taskList" :class="{done: isChecked(task)}">
+          <li v-for="note in noteArray" :class="{done: isChecked(note)}">
 
-            <input type="checkbox" class="checkbox"  v-on:click="check" v-model="task.checked">
-            <button class="delete" v-on:click="deleteNote(task)">x</button>
+            <input type="checkbox" class="checkbox"  v-on:click="check" v-model="note.checked">
+            <button class="delete" v-on:click="deleteNote(note)">x</button>
 
-            
-            <input type="text" v-if="task === noteEditing" v-auto-focus class="inputbar" v-on:keyup.enter="endEditing(task)" v-on:blur="endEditing(task)" v-model="task.text">
+            <!--To edit the note-->
+            <input type="text" v-if="note === noteEditing" v-auto-focus class="inputbar" v-on:keyup.enter="endEditing(note)" v-on:blur="endEditing(note)" v-model="note.text">
 
-            <label for="checkbox" v-if="task !== noteEditing" v-on:click="editNote(task)">{{ task.text }}</label>
+            <editBar for="checkbox" v-if="note !== noteEditing" v-on:click="editNote(note)">{{ note.text }}</editBar>
             
             
           </li>
@@ -179,11 +171,11 @@ button {
 
   new Vue({
     
-    el: '#notes',
+    el: '#bucketlist',
     
     data: {
       newNote: "",
-      taskList: [],
+      noteArray: [],
   
 
       noteEditing: {
@@ -194,9 +186,9 @@ button {
     computed: {
       areAllMarked: function () {
         //Check if every checked property returns true and if there is at least one to-do item
-        return this.taskList.every(function(task) {
-          return task.checked;
-        }) &&  this.taskList.length > 0;
+        return this.noteArray.every(function(note) {
+          return note.checked;
+        }) &&  this.noteArray.length > 0;
       },
     },
 
@@ -205,56 +197,56 @@ button {
       addNote: function () {
         alert('Adding new note!');
          //trim() is used to remove whitespace from both ends of a string
-        var task = this.newNote.trim();
+        var note = this.newNote.trim();
         //if task is not an empty string
-        if (task) {
+        if (note) {
           //Push an object containing the task to the taskList array
-          this.taskList.push({text: task, checked: false});
+          this.noteArray.push({text: note, checked: false});
           //Reset newNote to an empty string so the input field is cleared
           this.newNote = "";
         }
       },
 
-      deleteNote: function (task) {
+      deleteNote: function (note) {
         //Grab the index of the task and remove it
-        var index = this.taskList.indexOf(task);
-        this.taskList.splice(index, 1);
+        var index = this.noteArray.indexOf(note);
+        this.noteArray.splice(index, 1);
       },
 
-      editNote: function (task) {
-        this.noteEditing = task;
+      editNote: function (note) {
+        this.noteEditing = note;
       },
 
-      endEditing: function (task) {
+      endEditing: function (note) {
         this.noteEditing = {};
-        if (task.text.trim() === ""){
-          this.deleteNote(task);
+        if (note.text.trim() === ""){
+          this.deleteNote(note);
         }
         
       },
 
       deleteNotes: function () {
         //Setting taskList to an empty array clears the whole list
-        this.taskList = [
+        this.noteArray = [
 
         ];
       },
 
-      allSelect: function (task) {
+      allSelect: function (note) {
         //targetValue is set to the opposite of areAllMarked
         var targetValue = this.areAllMarked ? false : true;
         //we use a for loop to set the checked state of all items to the target value
-        for (var i = 0; i < this.taskList.length; i++) {
-          this.taskList[i].checked = targetValue;
+        for (var i = 0; i < this.noteArray.length; i++) {
+          this.noteArray[i].checked = targetValue;
         }
       },
 
-      check: function (task) {
-        task.checked = true;
+      check: function (note) {
+        note.checked = true;
       },
 
-      isChecked: function (task) {
-        return task.checked;
+      isChecked: function (note) {
+        return note.checked;
       }
 
     }
